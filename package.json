@@ -1,0 +1,29 @@
+{
+  "name": "demo-ts",
+  "version": "1.0.0",
+  "description": "nothing",
+  "main": "a.js",
+  "scripts": {
+    "test": "testcmd"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/astevenSume/st-book.git"
+  },
+  "keywords": [
+    "shaotai",
+    "lex"
+  ],
+  "author": "slex",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/astevenSume/st-book/issues"
+  },
+  "homepage": "https://github.com/astevenSume/st-book#readme",
+  "devDependencies": {
+    "gulp": "^4.0.0"
+  },
+  "dependencies": {
+    "jquery": "^3.3.1"
+  }
+}

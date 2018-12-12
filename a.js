@@ -1,3 +1,5 @@
-aa.js
-adb.com
-addff
+function Nonn {
+
+}
+
+new Nonn;
