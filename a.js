@@ -1,5 +1,0 @@
-function Nonn {
-
-}
-
-new Nonn;
