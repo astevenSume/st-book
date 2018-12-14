@@ -6,8 +6,26 @@ var gulp = require('gulp'),
     buffer= require('vinyl-buffer'),
     transform = require('vinyl-transform'),
     uglify = require('gulp-uglify'),
-    sourcemaps = require('gulp-sourcemaps');
+    sourcemaps = require('gulp-sourcemaps')
+    browserSync = require('browser-sync').create();
+
+
+var Server = require('karma').Server;
+
+    // karma = require('gulp-karma');
     // require('./temp/source/js/main');
+
+gulp.task('karma', function(done){
+  new Server({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: true
+  }, function(exitCode){
+    console.log('Karmas has exited with ' + exitCode);
+    done();
+    // process.exit(exitCode);
+  }).start();
+
+});
 
 var browserified = transform(function(filename){
   var b = browserify({entries: filename, debug: true});
@@ -32,19 +50,19 @@ gulp.task('bundle-test-other', function(){
     .pipe(gulp.dest('./dist/test/'));
 });
 
-gulp.task('bundle-js', function(){
-  return gulp.src('./temp/source/js/main.js')
-    .pipe(browserified)
-    .pipe(sourcemaps.init({loadMaps: true}))
-    .pipe(uglify())
-    .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest('./dist/source/js/'))
-});
-gulp.task('bundle-test',function(){
-  return gulp.src('./temp/source/**/**.js')
-    .pipe(browserified)
-    .pipe(gulp.dest('./dist/test/'))
-});
+// gulp.task('bundle-js', function(){
+//   return gulp.src('./temp/source/js/main.js')
+//     .pipe(browserified)
+//     .pipe(sourcemaps.init({loadMaps: true}))
+//     .pipe(uglify())
+//     .pipe(sourcemaps.write('./'))
+//     .pipe(gulp.dest('./dist/source/js/'))
+// });
+// gulp.task('bundle-test',function(){
+//   return gulp.src('./temp/source/**/**.js')
+//     .pipe(browserified)
+//     .pipe(gulp.dest('./dist/test/'))
+// });
 
 gulp.task('lint',function(){
   return gulp.src(['./source/ts/**/**.ts','./test/**/**.test.ts']).pipe(tslint({
@@ -67,14 +85,43 @@ var tsTestProject = ts.createProject({
   declarationFiles: false
 });
 
+gulp.task('tsc-tests', function(){
+  return gulp.src('./test/**/**.ts').pipe(tsTestProject()).js.pipe(gulp.dest('./temp/test/'));
+});
+
 gulp.task('tsc', function(){
   return gulp.src('./source/ts/**/**.ts').pipe(tsProject()).js.pipe(gulp.dest('./temp/source/js'));
 });
 
-gulp.task('tsc-tests', function(){
-  return gulp.src('./test/**/**.test.ts').pipe(tsTestProject()).js.pipe(gulp.dest('./temp/test/'));
+gulp.task('browser-sync',function(done){
+  browserSync.init({
+    server: {baseDir:"./dist", index: "index.html"},
+    port:10223
+  });
+  gulp.watch('./dist/test/css/main.css', bundlest);
+  // gulp.watch('./dist/index.html').on('change', browserSync.reload);
+  gulp.watch('./dist/global.js').on('change', browserSync.reload);
+  gulp.watch('./dist/g.css').on('change', browserSync.reload);
+
+  done();
+})
+
+function bundlest(done){
+  console.log(334444);
+
+  var b = browserify({entries: './temp/test/main.test.js', debug: true});
+     b.bundle()
+    .pipe(source('test.js'))
+    .pipe(buffer())
+    .pipe(gulp.dest('./dist/test/'));
+
+  done();
+}
+gulp.task('watch', function(done){
+  gulp.watch('./dist/**/*', bundlest);
+  done();
 });
 
-
-
-gulp.task('default', gulp.series('lint','tsc','tsc-tests', 'bundle-js-other','bundle-test-other'));
+// gulp.task('default', gulp.series('lint',['tsc-tests','tsc'],['bundle-js-other','bundle-test-other'], 'karma',
+//                        'watch','browser-sync'));
+gulp.task('default', gulp.series('lint',['tsc-tests','tsc'],['bundle-js-other','bundle-test-other'],'browser-sync'));
